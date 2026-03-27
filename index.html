@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Erica</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            transition: background-color 0.3s ease;
+        }
+
+        #start-screen {
+            text-align: center;
+            font-size: 2rem;
+            animation: pulse 2s infinite;
+            cursor: pointer;
+        }
+
+        #terminal-screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            color: #00ff00;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 20px;
+            font-size: 1.2rem;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+            white-space: pre-wrap;
+            overflow-y: auto;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.2rem;
+            background-color: #00ff00;
+            animation: blink 1s step-end infinite;
+            vertical-align: bottom;
+        }
+
+        .highlight-danger {
+            color: #ff0000;
+            font-weight: bold;
+            font-size: 1.8rem;
+            text-shadow: 0 0 5px #ff0000;
+            background-color: rgba(255, 0, 0, 0.1);
+            padding: 5px;
+            border-left: 5px solid #ff0000;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="start-screen">
+        Erica, aperta qualquer tecla:
+    </div>
+
+    <div id="terminal-screen">
+        <div id="output"></div>
+        <div id="cursor-line"><span class="cursor"></span></div>
+    </div>
+
+    <script>
+        const startScreen = document.getElementById('start-screen');
+        const terminalScreen = document.getElementById('terminal-screen');
+        const output = document.getElementById('output');
+        
+        let started = false;
+        let finished = false;
+
+        const lines = [
+            { text: "> Iniciando Sistema de Monitoramento Comercial...", delay: 1000 },
+            { text: "> Carregando módulo de paciência do Programador: [██████████] 100%", delay: 1500 },
+            { text: "> Analisando banco de dados de dúvidas da Erica...", delay: 1000 },
+            { text: "> AVISO: Sobrecarga de perguntas óbvias detectada. 🚨", delay: 1500 },
+            { text: "> [LOG] Verificando histórico: Sim, você fez essa mesma pergunta semana passada.", delay: 1200 },
+            { text: "> [LOG] Erro 404: Bom senso não encontrado no seu último ticket.", delay: 1200 },
+            { text: "> [LOG] Convertendo café em tolerância corporativa...", delay: 1500 },
+            { text: "> [LOG] Baixando tutorial 'Como ler a tela antes de chamar o TI' (Estimativa: 99 horas).", delay: 1500 },
+            { text: "> [LOG] Dica do sistema: O botão direito do mouse também existe e faz milagres.", delay: 1200 },
+            { text: "> [LOG] Se 'dar refresh' fosse uma habilidade, você já seria Tech Lead.", delay: 1500 },
+            { text: "> [LOG] Limpando cookies e expectativas irrealistas do setor comercial...", delay: 1200 },
+            { text: "> [LOG] Atenção: Cache de 'perguntas que eu já respondi' atingiu o limite crítico.", delay: 1500 },
+            { text: "> [LOG] Reiniciando roteador da minha sanidade mental.", delay: 1200 },
+            { text: "> [LOG] Status atual: Sobrevivendo à base de ironia e Stack Overflow.", delay: 1500 },
+            { text: "> Estabelecendo conexão visual dos fatos:", delay: 800 },
+            { text: "  Erica no setor comercial:", delay: 500 },
+            { text: "   /\\_/\\ \n  ( o.o ) \n   > ^ < \"Gente, a internet caiu ou é o sistema? 🥺\"", delay: 2000 },
+            { text: "  Eu lidando com a situação:", delay: 500 },
+            { text: "   /\\_/\\ \n  ( -.- ) \n   > ^ < *Olhando pro cabo de rede desconectado no seu pé*", delay: 2500 },
+            { text: "> Conclusão do sistema: Você dá trabalho, mas a gente releva (por enquanto).", delay: 2000 },
+            { text: "> ", delay: 1000 },
+            { text: "<span class='highlight-danger'>VOU AGUARDAR VOCÊ DAR UMA VACILADA VIU!!</span>", delay: 2000, isHTML: true },
+            { text: "> ", delay: 500 },
+            { text: "[ SISTEMA PAUSADO - APERTE QUALQUER TECLA PARA SAIR ]", delay: 0 }
+        ];
+
+        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+        async function typeLine(lineObj) {
+            let currentLine = document.createElement('div');
+            output.appendChild(currentLine);
+            
+            if (lineObj.isHTML) {
+                // Se for HTML direto (para o destaque), insere de uma vez para não quebrar as tags
+                currentLine.innerHTML = lineObj.text;
+                await sleep(500);
+            } else {
+                // Digitação letra por letra
+                let text = lineObj.text;
+                for (let i = 0; i < text.length; i++) {
+                    currentLine.innerHTML += text.charAt(i) === '\n' ? '<br>' : text.charAt(i);
+                    await sleep(text.includes('/\\_') ? 5 : 30); 
+                }
+            }
+        }
+
+        async function runTerminal() {
+            for (const line of lines) {
+                await typeLine(line);
+                await sleep(line.delay);
+                window.scrollTo(0, document.body.scrollHeight);
+            }
+            finished = true;
+        }
+
+        document.addEventListener('keydown', async (e) => {
+            if (!started) {
+                started = true;
+                
+                try {
+                    if (document.documentElement.requestFullscreen) {
+                        await document.documentElement.requestFullscreen();
+                    }
+                } catch (err) {
+                    console.log("Tela cheia bloqueada ou não suportada.");
+                }
+
+                startScreen.style.display = 'none';
+                document.body.style.backgroundColor = '#000000';
+                terminalScreen.style.display = 'flex';
+                
+                runTerminal();
+            } else if (finished) {
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                }
+                document.body.innerHTML = '<h1 style="color: #333; text-align: center; width: 100%; margin-top: 20%;">Fim da linha. Vai trabalhar.</h1>';
+            }
+        });
+    </script>
+</body>
+</html>
