@@ -1,181 +1,280 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Para Erica</title>
+    <title>Treinamento de Lógica - Nível Sênior</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
         body {
-            background-color: #121212;
-            color: #ffffff;
+            background-color: #0d1117;
+            color: #c9d1d9;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            height: 100vh;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            transition: background-color 0.3s ease;
-        }
-
-        #start-screen {
-            text-align: center;
-            font-size: 2rem;
-            animation: pulse 2s infinite;
-            cursor: pointer;
-        }
-
-        #terminal-screen {
-            display: none;
-            width: 100%;
-            height: 100%;
-            background-color: #000000;
-            color: #00ff00;
-            font-family: 'Courier New', Courier, monospace;
-            padding: 20px;
-            font-size: 1.2rem;
             flex-direction: column;
-            justify-content: flex-start;
-            align-items: flex-start;
-            white-space: pre-wrap;
-            overflow-y: auto;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
         }
 
-        .cursor {
-            display: inline-block;
-            width: 10px;
-            height: 1.2rem;
-            background-color: #00ff00;
-            animation: blink 1s step-end infinite;
-            vertical-align: bottom;
+        h1 {
+            color: #58a6ff;
+            margin-bottom: 5px;
         }
 
-        .highlight-danger {
-            color: #ff0000;
+        #status {
+            font-size: 1.2rem;
+            height: 30px;
+            margin-bottom: 20px;
+            color: #ff7b72;
             font-weight: bold;
-            font-size: 1.8rem;
-            text-shadow: 0 0 5px #ff0000;
-            background-color: rgba(255, 0, 0, 0.1);
-            padding: 5px;
-            border-left: 5px solid #ff0000;
+            text-align: center;
         }
 
-        @keyframes pulse {
-            0% { opacity: 0.5; }
-            50% { opacity: 1; }
-            100% { opacity: 0.5; }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+            position: relative; /* Para permitir a casa flutuante */
         }
 
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
+        .cell {
+            background-color: #161b22;
+            border: 2px solid #30363d;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            user-select: none;
         }
+
+        .cell:hover {
+            background-color: #21262d;
+        }
+
+        .x { color: #8b949e; } /* Cinza sem graça para o usuário */
+        .o { color: #3fb950; } /* Verde brilhante para o Sênior */
+
+        .cell.cheated {
+            animation: glitch 0.3s linear infinite;
+            border-color: #ff7b72;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0) }
+            20% { transform: translate(-2px, 2px) }
+            40% { transform: translate(-2px, -2px) }
+            60% { transform: translate(2px, 2px) }
+            80% { transform: translate(2px, -2px) }
+            100% { transform: translate(0) }
+        }
+
+        /* A 10ª Casa Surpresa */
+        .extra-cell {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background-color: #161b22;
+            border: 2px dashed #ff7b72;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: bold;
+            color: #3fb950;
+            top: 210px; 
+            left: 320px; /* Fora do grid */
+            box-shadow: 0 0 15px #ff7b72;
+        }
+
+        button {
+            margin-top: 30px;
+            padding: 10px 20px;
+            background-color: #238636;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        button:hover { background-color: #2ea043; }
     </style>
 </head>
 <body>
 
-    <div id="start-screen">
-        Erica, aperta qualquer tecla:
+    <h1>Desafio Lógico</h1>
+    <div id="status">Sua vez, novata. Tente não demorar.</div>
+    
+    <div class="board" id="board">
+        <div class="cell" data-index="0"></div>
+        <div class="cell" data-index="1"></div>
+        <div class="cell" data-index="2"></div>
+        <div class="cell" data-index="3"></div>
+        <div class="cell" data-index="4"></div>
+        <div class="cell" data-index="5"></div>
+        <div class="cell" data-index="6"></div>
+        <div class="cell" data-index="7"></div>
+        <div class="cell" data-index="8"></div>
     </div>
 
-    <div id="terminal-screen">
-        <div id="output"></div>
-        <div id="cursor-line"><span class="cursor"></span></div>
-    </div>
+    <button onclick="resetGame()">Tentar de novo (spoiler: vai perder igual)</button>
 
     <script>
-        const startScreen = document.getElementById('start-screen');
-        const terminalScreen = document.getElementById('terminal-screen');
-        const output = document.getElementById('output');
-        
-        let started = false;
-        let finished = false;
+        let board = ["", "", "", "", "", "", "", "", ""];
+        let gameActive = true;
+        const statusDisplay = document.getElementById('status');
+        const boardElement = document.getElementById('board');
+        let turnosComputador = 0;
 
-        const lines = [
-            { text: "> Iniciando Sistema de Monitoramento Comercial...", delay: 1000 },
-            { text: "> Carregando módulo de paciência do Programador: [██████████] 100%", delay: 1500 },
-            { text: "> Analisando banco de dados de dúvidas da Erica...", delay: 1000 },
-            { text: "> AVISO: Sobrecarga de perguntas óbvias detectada. 🚨", delay: 1500 },
-            { text: "> [LOG] Verificando histórico: Sim, você fez essa mesma pergunta semana passada.", delay: 1200 },
-            { text: "> [LOG] Erro 404: Bom senso não encontrado no seu último ticket.", delay: 1200 },
-            { text: "> [LOG] Convertendo café em tolerância corporativa...", delay: 1500 },
-            { text: "> [LOG] Baixando tutorial 'Como ler a tela antes de chamar o TI' (Estimativa: 99 horas).", delay: 1500 },
-            { text: "> [LOG] Dica do sistema: O botão direito do mouse também existe e faz milagres.", delay: 1200 },
-            { text: "> [LOG] Se 'dar refresh' fosse uma habilidade, você já seria Tech Lead.", delay: 1500 },
-            { text: "> [LOG] Limpando cookies e expectativas irrealistas do setor comercial...", delay: 1200 },
-            { text: "> [LOG] Atenção: Cache de 'perguntas que eu já respondi' atingiu o limite crítico.", delay: 1500 },
-            { text: "> [LOG] Reiniciando roteador da minha sanidade mental.", delay: 1200 },
-            { text: "> [LOG] Status atual: Sobrevivendo à base de ironia e Stack Overflow.", delay: 1500 },
-            { text: "> Estabelecendo conexão visual dos fatos:", delay: 800 },
-            { text: "  Erica no setor comercial:", delay: 500 },
-            { text: "   /\\_/\\ \n  ( o.o ) \n   > ^ < \"Ei amigo, pq o chat tá preto? 🥺\"", delay: 2000 },
-            { text: "  Eu lidando com a situação:", delay: 500 },
-            { text: "   /\\_/\\ \n  ( -.- ) \n   > ^ < *Eu vendo ela com o monitor desligado...*", delay: 2500 },
-            { text: "> Conclusão do sistema: Você dá trabalho, mas a gente releva (por enquanto).", delay: 2000 },
-            { text: "> ", delay: 1000 },
-            { text: "<span class='highlight-danger'>VOU AGUARDAR VOCÊ DAR UMA VACILADA VIU!!</span>", delay: 2000, isHTML: true },
-            { text: "> ", delay: 500 },
-            { text: "[ SISTEMA PAUSADO - APERTE QUALQUER TECLA PARA SAIR ]", delay: 0 }
+        const provocacoes = [
+            "Lento demais. Meu código compila mais rápido que seu raciocínio.",
+            "Essa foi sua melhor jogada? Preocupante.",
+            "Típico erro de lógica de quem é de humanas.",
+            "Você joga tão mal que me deu vontade de refatorar seu cérebro.",
+            "Estou usando apenas 1% da CPU para te vencer."
         ];
 
-        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+        const winConditions = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Linhas
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Colunas
+            [0, 4, 8], [2, 4, 6]             // Diagonais
+        ];
 
-        async function typeLine(lineObj) {
-            let currentLine = document.createElement('div');
-            output.appendChild(currentLine);
+        document.querySelectorAll('.cell').forEach(cell => cell.addEventListener('click', handleCellClick));
+
+        function handleCellClick(e) {
+            const cell = e.target;
+            const index = parseInt(cell.getAttribute('data-index'));
+
+            if (board[index] !== "" || !gameActive) return;
+
+            // Jogada do Usuário
+            board[index] = "X";
+            cell.innerText = "X";
+            cell.classList.add('x');
+
+            if (checkWin("X")) {
+                // Se a Erica for ganhar, nós roubamos.
+                aplicarGitRevert(index);
+                return;
+            }
+
+            if (!board.includes("")) {
+                aplicarPensamentoForaDaCaixa();
+                return;
+            }
+
+            statusDisplay.innerText = "Processando sua jogada ineficiente...";
+            gameActive = false; // Bloqueia clique
             
-            if (lineObj.isHTML) {
-                // Se for HTML direto (para o destaque), insere de uma vez para não quebrar as tags
-                currentLine.innerHTML = lineObj.text;
-                await sleep(500);
-            } else {
-                // Digitação letra por letra
-                let text = lineObj.text;
-                for (let i = 0; i < text.length; i++) {
-                    currentLine.innerHTML += text.charAt(i) === '\n' ? '<br>' : text.charAt(i);
-                    await sleep(text.includes('/\\_') ? 5 : 30); 
-                }
-            }
+            setTimeout(computerPlay, 800);
         }
 
-        async function runTerminal() {
-            for (const line of lines) {
-                await typeLine(line);
-                await sleep(line.delay);
-                window.scrollTo(0, document.body.scrollHeight);
+        function computerPlay() {
+            turnosComputador++;
+
+            // Trapaça 2: Multithreading (Joga duas vezes no turno 3)
+            if (turnosComputador === 3 && board.filter(x => x === "").length >= 2) {
+                fazerJogadaValida();
+                setTimeout(() => {
+                    fazerJogadaValida(true);
+                    statusDisplay.innerText = "Executei duas threads simultâneas. Lide com isso.";
+                    checkGameStatus();
+                }, 400);
+                return;
             }
-            finished = true;
+
+            fazerJogadaValida();
+            statusDisplay.innerText = provocacoes[Math.floor(Math.random() * provocacoes.length)];
+            checkGameStatus();
         }
 
-        document.addEventListener('keydown', async (e) => {
-            if (!started) {
-                started = true;
-                
-                try {
-                    if (document.documentElement.requestFullscreen) {
-                        await document.documentElement.requestFullscreen();
-                    }
-                } catch (err) {
-                    console.log("Tela cheia bloqueada ou não suportada.");
-                }
+        function fazerJogadaValida(isDouble = false) {
+            let emptyCells = board.map((val, idx) => val === "" ? idx : null).filter(val => val !== null);
+            if (emptyCells.length === 0) return;
 
-                startScreen.style.display = 'none';
-                document.body.style.backgroundColor = '#000000';
-                terminalScreen.style.display = 'flex';
+            // IA burra, pega aleatório, porque a gente ganha roubando
+            let randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+            
+            board[randomIndex] = "O";
+            let cell = document.querySelector(`[data-index='${randomIndex}']`);
+            cell.innerText = "O";
+            cell.classList.add('o');
+            
+            if(isDouble) cell.classList.add('cheated');
+        }
+
+        // Trapaça 1: Apaga o X dela e bota O
+        function aplicarGitRevert(lastPlayerMove) {
+            setTimeout(() => {
+                board[lastPlayerMove] = "O";
+                let cell = document.querySelector(`[data-index='${lastPlayerMove}']`);
+                cell.innerText = "O";
+                cell.classList.remove('x');
+                cell.classList.add('o');
+                cell.classList.add('cheated');
                 
-                runTerminal();
-            } else if (finished) {
-                if (document.fullscreenElement) {
-                    document.exitFullscreen();
-                }
-                document.body.innerHTML = '<h1 style="color: #333; text-align: center; width: 100%; margin-top: 20%;">Fim da linha. Vai trabalhar.</h1>';
+                statusDisplay.innerText = "[ERRO DE PERMISSÃO] Dei um Git Revert na sua jogada. Sênior é Admin.";
+                checkGameStatus();
+            }, 500);
+        }
+
+        // Trapaça 3: Cria uma casa fora do tabuleiro
+        function aplicarPensamentoForaDaCaixa() {
+            statusDisplay.innerText = "Deu velha? Não para mim. Pensamento lateral, aprenda.";
+            
+            const extraCell = document.createElement('div');
+            extraCell.className = 'extra-cell';
+            extraCell.innerText = 'O';
+            boardElement.appendChild(extraCell);
+            
+            setTimeout(() => {
+                statusDisplay.innerText = "Eu sempre venço. Volta a trabalhar vai.";
+            }, 1500);
+        }
+
+        function checkWin(player) {
+            return winConditions.some(condition => {
+                return condition.every(index => board[index] === player);
+            });
+        }
+
+        function checkGameStatus() {
+            if (checkWin("O")) {
+                statusDisplay.innerText = "VITÓRIA. Como esperado de um desenvolvedor Sênior.";
+                gameActive = false;
+                return;
             }
-        });
+            if (!board.includes("")) {
+                aplicarPensamentoForaDaCaixa();
+                return;
+            }
+            gameActive = true;
+        }
+
+        function resetGame() {
+            board = ["", "", "", "", "", "", "", "", ""];
+            gameActive = true;
+            turnosComputador = 0;
+            statusDisplay.innerText = "Vamos lá de novo. Tente usar o cérebro desta vez.";
+            
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.innerText = "";
+                cell.className = "cell";
+            });
+            
+            let extra = document.querySelector('.extra-cell');
+            if (extra) extra.remove();
+        }
     </script>
 </body>
 </html>
