@@ -6,64 +6,24 @@
     <title>Treinamento de Lógica - Nível Sênior</title>
     <style>
         body {
-            background-color: #0d1117;
-            color: #c9d1d9;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-            position: relative;
+            background-color: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; margin: 0; overflow: hidden; position: relative;
         }
-
-        h1 {
-            color: #58a6ff;
-            margin-bottom: 5px;
-        }
-
-        #status {
-            font-size: 1.2rem;
-            height: 30px;
-            margin-bottom: 20px;
-            color: #ff7b72;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .board {
-            display: grid;
-            grid-template-columns: repeat(3, 100px);
-            grid-template-rows: repeat(3, 100px);
-            gap: 5px;
-            position: relative; 
-        }
-
+        h1 { color: #58a6ff; margin-bottom: 5px; }
+        #status { font-size: 1.2rem; height: 30px; margin-bottom: 20px; color: #ff7b72; font-weight: bold; text-align: center; }
+        
+        .board { display: grid; grid-template-columns: repeat(3, 100px); grid-template-rows: repeat(3, 100px); gap: 5px; position: relative; }
         .cell {
-            background-color: #161b22;
-            border: 2px solid #30363d;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            user-select: none;
+            background-color: #161b22; border: 2px solid #30363d; border-radius: 8px; display: flex;
+            align-items: center; justify-content: center; font-size: 3rem; font-weight: bold; cursor: pointer;
+            transition: background-color 0.2s; user-select: none;
         }
-
         .cell:hover { background-color: #21262d; }
         .x { color: #8b949e; }
         .o { color: #3fb950; }
 
-        .cell.cheated {
-            animation: glitch 0.3s linear infinite;
-            border-color: #ff7b72;
-        }
-
+        .cell.cheated { animation: glitch 0.3s linear infinite; border-color: #ff7b72; }
         @keyframes glitch {
             0% { transform: translate(0) }
             20% { transform: translate(-2px, 2px) }
@@ -80,80 +40,32 @@
             top: 210px; left: 320px; box-shadow: 0 0 15px #ff7b72; z-index: 5;
         }
 
-        /* --- NOVAS ANIMAÇÕES --- */
-        
-        /* O Risco da Vitória */
         #strike-line {
-            position: absolute;
-            background-color: #3fb950;
-            height: 8px;
-            border-radius: 4px;
-            z-index: 10;
-            transform-origin: left center;
-            display: none;
-            box-shadow: 0 0 10px #3fb950;
-            /* A largura inicial é 0, a animação preenche */
+            position: absolute; background-color: #3fb950; height: 8px; border-radius: 4px;
+            z-index: 10; transform-origin: left center; display: none; box-shadow: 0 0 10px #3fb950;
         }
+        @keyframes drawLine { from { width: 0; } to { width: var(--final-width); } }
 
-        @keyframes drawLine {
-            from { width: 0; }
-            to { width: var(--final-width); }
-        }
-
-        /* Tela de Derrota GIGANTE */
         #defeat-screen {
-            position: absolute;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: rgba(13, 17, 23, 0.85);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            backdrop-filter: blur(5px);
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: rgba(13, 17, 23, 0.85); display: none; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px);
         }
-
         .defeat-text {
-            font-size: 8rem; /* GIGANTE */
-            color: #ff7b72;
-            font-weight: 900;
-            letter-spacing: 5px;
-            text-shadow: 0 0 20px rgba(255, 123, 114, 0.8);
-            transform: scale(5);
-            opacity: 0;
+            font-size: 8rem; color: #ff7b72; font-weight: 900; letter-spacing: 5px;
+            text-shadow: 0 0 20px rgba(255, 123, 114, 0.8); transform: scale(5); opacity: 0;
             animation: stampIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
+        .defeat-sub { font-size: 2rem; color: #8b949e; margin-top: 20px; opacity: 0; animation: fadeIn 1s ease forwards 1s; }
+        @keyframes stampIn { 100% { transform: scale(1) rotate(-5deg); opacity: 1; } }
+        @keyframes fadeIn { to { opacity: 1; } }
 
-        .defeat-sub {
-            font-size: 2rem;
-            color: #8b949e;
-            margin-top: 20px;
-            opacity: 0;
-            animation: fadeIn 1s ease forwards 1s;
-        }
-
-        @keyframes stampIn {
-            100% { transform: scale(1) rotate(-5deg); opacity: 1; }
-        }
-        @keyframes fadeIn {
-            to { opacity: 1; }
-        }
-
-        /* Partículas de Confete */
-        .confetti {
-            position: absolute;
-            width: 15px; height: 15px;
-            z-index: 99;
-            animation: fall linear forwards;
-        }
-        @keyframes fall {
-            to { transform: translateY(110vh) rotate(720deg); }
-        }
+        .confetti { position: absolute; width: 15px; height: 15px; z-index: 99; animation: fall linear forwards; }
+        @keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
 
         button {
             margin-top: 30px; padding: 10px 20px; background-color: #238636; color: white;
-            border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: bold;
-            z-index: 101; /* Fica acima da tela de derrota para reiniciar */
+            border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: bold; z-index: 101;
         }
         button:hover { background-color: #2ea043; }
     </style>
@@ -178,7 +90,6 @@
 
     <button onclick="resetGame()">Reiniciar Ambiente (Você vai perder de novo)</button>
 
-    <!-- Overlay de Derrota -->
     <div id="defeat-screen">
         <div class="defeat-text">DERROTA</div>
         <div class="defeat-sub">A superioridade técnica prevalece.</div>
@@ -191,39 +102,36 @@
         const boardElement = document.getElementById('board');
         const strikeLine = document.getElementById('strike-line');
         const defeatScreen = document.getElementById('defeat-screen');
-        let turnosComputador = 0;
 
         const winConditions = [
-            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Linhas
-            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Colunas
-            [0, 4, 8], [2, 4, 6]             // Diagonais
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]            
         ];
 
-        // Mapeamento das coordenadas do risco para cada condição de vitória
         const lineStyles = [
-            { top: '48px', left: '10px', width: '290px', transform: 'rotate(0deg)' },     // Linha 1
-            { top: '153px', left: '10px', width: '290px', transform: 'rotate(0deg)' },    // Linha 2
-            { top: '258px', left: '10px', width: '290px', transform: 'rotate(0deg)' },    // Linha 3
-            { top: '10px', left: '48px', width: '290px', transform: 'rotate(90deg)' },    // Coluna 1
-            { top: '10px', left: '153px', width: '290px', transform: 'rotate(90deg)' },   // Coluna 2
-            { top: '10px', left: '258px', width: '290px', transform: 'rotate(90deg)' },   // Coluna 3
-            { top: '15px', left: '15px', width: '400px', transform: 'rotate(45deg)' },    // Diagonal Principal
-            { top: '15px', left: '295px', width: '400px', transform: 'rotate(135deg)' }   // Diagonal Secundária
+            { top: '48px', left: '10px', width: '290px', transform: 'rotate(0deg)' },
+            { top: '153px', left: '10px', width: '290px', transform: 'rotate(0deg)' },
+            { top: '258px', left: '10px', width: '290px', transform: 'rotate(0deg)' },
+            { top: '10px', left: '48px', width: '290px', transform: 'rotate(90deg)' },
+            { top: '10px', left: '153px', width: '290px', transform: 'rotate(90deg)' },
+            { top: '10px', left: '258px', width: '290px', transform: 'rotate(90deg)' },
+            { top: '15px', left: '15px', width: '400px', transform: 'rotate(45deg)' },
+            { top: '15px', left: '295px', width: '400px', transform: 'rotate(135deg)' }
         ];
 
         document.querySelectorAll('.cell').forEach(cell => cell.addEventListener('click', handleCellClick));
 
         function handleCellClick(e) {
-            const cell = e.target;
-            const index = parseInt(cell.getAttribute('data-index'));
-
+            const index = parseInt(e.target.getAttribute('data-index'));
             if (board[index] !== "" || !gameActive) return;
 
-            board[index] = "X";
-            cell.innerText = "X";
-            cell.classList.add('x');
+            // Jogada dela
+            atualizarCasa(index, "X");
 
-            if (checkWin("X")) {
+            // Se a jogada dela der vitória, roubamos IMEDIATAMENTE.
+            if (checkWin("X") !== -1) {
+                gameActive = false;
                 aplicarGitRevert(index);
                 return;
             }
@@ -233,25 +141,38 @@
                 return;
             }
 
-            statusDisplay.innerText = "Processando sua jogada ineficiente...";
+            statusDisplay.innerText = "Calculando...";
             gameActive = false;
             setTimeout(computerPlay, 600);
         }
 
         function computerPlay() {
-            turnosComputador++;
+            let userCells = board.map((v, i) => v === "X" ? i : null).filter(v => v !== null);
+            let emptyCount = board.filter(x => x === "").length;
+            
+            // RNG (Sorteio do Roubo) de 0 a 100
+            let chance = Math.floor(Math.random() * 100);
 
-            if (turnosComputador === 3 && board.filter(x => x === "").length >= 2) {
+            // Roubo 1: Apaga um X dela do nada (30% de chance se ela tiver peças)
+            if (chance < 30 && userCells.length > 0) {
+                aplicarGarbageCollector(userCells);
+            } 
+            // Roubo 2: Joga duas vezes (30% de chance se tiver espaço)
+            else if (chance >= 30 && chance < 60 && emptyCount >= 2) {
                 fazerJogadaValida();
                 setTimeout(() => {
                     fazerJogadaValida(true);
-                    statusDisplay.innerText = "Executei duas threads simultâneas. Lide com isso.";
+                    statusDisplay.innerText = "[AVISO] Multithreading ativado. Duas jogadas num ciclo.";
                     checkGameStatus();
-                }, 300);
+                }, 400);
                 return;
+            } 
+            // Jogo "Normal"
+            else {
+                fazerJogadaValida();
+                statusDisplay.innerText = "Jogada processada. Não que você vá entender.";
             }
 
-            fazerJogadaValida();
             checkGameStatus();
         }
 
@@ -260,29 +181,45 @@
             if (emptyCells.length === 0) return;
 
             let randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-            board[randomIndex] = "O";
-            let cell = document.querySelector(`[data-index='${randomIndex}']`);
-            cell.innerText = "O";
-            cell.classList.add('o');
-            
-            if(isDouble) cell.classList.add('cheated');
+            atualizarCasa(randomIndex, "O", isDouble);
         }
 
-        function aplicarGitRevert(lastPlayerMove) {
+        function atualizarCasa(index, player, cheated = false) {
+            board[index] = player;
+            let cell = document.querySelector(`[data-index='${index}']`);
+            cell.innerText = player;
+            cell.className = 'cell ' + player.toLowerCase();
+            if (cheated) cell.classList.add('cheated');
+        }
+
+        // --- ARSENAL DE ROUBOS ---
+
+        // Deleta um X do passado
+        function aplicarGarbageCollector(userCells) {
+            let targetDelete = userCells[Math.floor(Math.random() * userCells.length)];
+            board[targetDelete] = ""; // Limpa lógica
+            let cell = document.querySelector(`[data-index='${targetDelete}']`);
+            cell.innerText = "";
+            cell.className = 'cell cheated'; // Dá um glitch visual
+            
+            statusDisplay.innerText = "[LIMPANDO CACHE] Achei um memory leak e removi seu X antigo.";
+            
+            // Joga logo em seguida
+            setTimeout(() => fazerJogadaValida(), 400);
+        }
+
+        // Rouba a casa da vitória dela
+        function aplicarGitRevert(lastMoveIndex) {
+            statusDisplay.innerText = "Interferência detectada. Revertendo seu commit...";
             setTimeout(() => {
-                board[lastPlayerMove] = "O";
-                let cell = document.querySelector(`[data-index='${lastPlayerMove}']`);
-                cell.innerText = "O";
-                cell.classList.remove('x');
-                cell.classList.add('o', 'cheated');
-                
-                statusDisplay.innerText = "[ERRO DE PERMISSÃO] Dei um Git Revert na sua jogada. Sênior é Admin.";
+                atualizarCasa(lastMoveIndex, "O", true);
+                statusDisplay.innerText = "[ACESSO NEGADO] Dei Git Revert na sua vitória.";
                 checkGameStatus();
-            }, 500);
+            }, 800);
         }
 
         function aplicarPensamentoForaDaCaixa() {
-            statusDisplay.innerText = "Pensamento lateral aplicado. A vitória é inevitável.";
+            statusDisplay.innerText = "Sistema travado? O Sênior cria a própria saída.";
             const extraCell = document.createElement('div');
             extraCell.className = 'extra-cell';
             extraCell.innerText = 'O';
@@ -291,10 +228,12 @@
             setTimeout(() => { triggerHumiliation(null); }, 1000);
         }
 
+        // --- FIM DOS ROUBOS ---
+
         function checkWin(player) {
             for (let i = 0; i < winConditions.length; i++) {
                 if (winConditions[i].every(index => board[index] === player)) {
-                    return i; // Retorna o índice da condição vencedora
+                    return i; 
                 }
             }
             return -1;
@@ -303,7 +242,7 @@
         function checkGameStatus() {
             let winIndex = checkWin("O");
             if (winIndex !== -1) {
-                statusDisplay.innerText = "Sistemas normais. Sênior vence.";
+                statusDisplay.innerText = "Fim de jogo.";
                 gameActive = false;
                 triggerHumiliation(winIndex);
                 return;
@@ -313,25 +252,17 @@
                 return;
             }
             gameActive = true;
-            statusDisplay.innerText = "Sua vez. Tente não passar vergonha.";
         }
 
-        // --- MOTOR DE HUMILHAÇÃO (Animações) ---
         function triggerHumiliation(winComboIndex) {
             gameActive = false;
-
-            // 1. Desenha a linha riscando a velha (se não foi vitória pela casa extra)
             if (winComboIndex !== null) {
                 let style = lineStyles[winComboIndex];
-                strikeLine.style.top = style.top;
-                strikeLine.style.left = style.left;
-                strikeLine.style.transform = style.transform;
-                strikeLine.style.setProperty('--final-width', style.width);
-                strikeLine.style.display = 'block';
-                strikeLine.style.animation = 'drawLine 0.5s ease forwards';
+                strikeLine.style.top = style.top; strikeLine.style.left = style.left;
+                strikeLine.style.transform = style.transform; strikeLine.style.setProperty('--final-width', style.width);
+                strikeLine.style.display = 'block'; strikeLine.style.animation = 'drawLine 0.5s ease forwards';
             }
 
-            // 2. Espera a linha terminar, aí joga a tela e confetes
             setTimeout(() => {
                 defeatScreen.style.display = 'flex';
                 shootConfetti();
@@ -348,8 +279,6 @@
                 conf.style.animationDuration = (Math.random() * 2 + 2) + 's';
                 conf.style.animationDelay = (Math.random() * 0.5) + 's';
                 document.body.appendChild(conf);
-                
-                // Limpa o DOM depois que o confete cair
                 setTimeout(() => conf.remove(), 5000);
             }
         }
@@ -357,12 +286,10 @@
         function resetGame() {
             board = ["", "", "", "", "", "", "", "", ""];
             gameActive = true;
-            turnosComputador = 0;
-            statusDisplay.innerText = "Novo jogo. O resultado será o mesmo.";
+            statusDisplay.innerText = "Tente de novo. O algoritmo é impiedoso.";
             
             document.querySelectorAll('.cell').forEach(cell => {
-                cell.innerText = "";
-                cell.className = "cell";
+                cell.innerText = ""; cell.className = "cell";
             });
             
             let extra = document.querySelector('.extra-cell');
