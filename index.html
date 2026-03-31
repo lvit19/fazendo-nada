@@ -3,302 +3,243 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Treinamento de Lógica - Nível Sênior</title>
+    <title>Erica Martins - Performance Dashboard [ACESSO RESTRITO - SÊNIOR ONLY]</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
-            background-color: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 100vh; margin: 0; overflow: hidden; position: relative;
-        }
-        h1 { color: #58a6ff; margin-bottom: 5px; }
-        #status { font-size: 1.2rem; height: 30px; margin-bottom: 20px; color: #ff7b72; font-weight: bold; text-align: center; }
-        
-        .board { display: grid; grid-template-columns: repeat(3, 100px); grid-template-rows: repeat(3, 100px); gap: 5px; position: relative; }
-        .cell {
-            background-color: #161b22; border: 2px solid #30363d; border-radius: 8px; display: flex;
-            align-items: center; justify-content: center; font-size: 3rem; font-weight: bold; cursor: pointer;
-            transition: background-color 0.2s; user-select: none;
-        }
-        .cell:hover { background-color: #21262d; }
-        .x { color: #8b949e; }
-        .o { color: #3fb950; }
-
-        .cell.cheated { animation: glitch 0.3s linear infinite; border-color: #ff7b72; }
-        @keyframes glitch {
-            0% { transform: translate(0) }
-            20% { transform: translate(-2px, 2px) }
-            40% { transform: translate(-2px, -2px) }
-            60% { transform: translate(2px, 2px) }
-            80% { transform: translate(2px, -2px) }
-            100% { transform: translate(0) }
+            background-color: #f0f2f5;
+            color: #1c1e21;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .extra-cell {
-            position: absolute; width: 100px; height: 100px; background-color: #161b22;
-            border: 2px dashed #ff7b72; border-radius: 8px; display: flex; align-items: center;
-            justify-content: center; font-size: 3rem; font-weight: bold; color: #3fb950;
-            top: 210px; left: 320px; box-shadow: 0 0 15px #ff7b72; z-index: 5;
+        /* Top Bar de BI Corporativo */
+        header {
+            width: 100%;
+            height: 60px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            box-sizing: border-box;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
         }
 
-        #strike-line {
-            position: absolute; background-color: #3fb950; height: 8px; border-radius: 4px;
-            z-index: 10; transform-origin: left center; display: none; box-shadow: 0 0 10px #3fb950;
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: #1877f2;
+            letter-spacing: -1px;
         }
-        @keyframes drawLine { from { width: 0; } to { width: var(--final-width); } }
 
-        #defeat-screen {
-            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: rgba(13, 17, 23, 0.85); display: none; flex-direction: column;
-            justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px);
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .defeat-text {
-            font-size: 8rem; color: #ff7b72; font-weight: 900; letter-spacing: 5px;
-            text-shadow: 0 0 20px rgba(255, 123, 114, 0.8); transform: scale(5); opacity: 0;
-            animation: stampIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-        .defeat-sub { font-size: 2rem; color: #8b949e; margin-top: 20px; opacity: 0; animation: fadeIn 1s ease forwards 1s; }
-        @keyframes stampIn { 100% { transform: scale(1) rotate(-5deg); opacity: 1; } }
-        @keyframes fadeIn { to { opacity: 1; } }
 
-        .confetti { position: absolute; width: 15px; height: 15px; z-index: 99; animation: fall linear forwards; }
-        @keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
-
-        button {
-            margin-top: 30px; padding: 10px 20px; background-color: #238636; color: white;
-            border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: bold; z-index: 101;
+        .user-profile .name {
+            font-weight: bold;
         }
-        button:hover { background-color: #2ea043; }
+
+        .user-profile .avatar-placeholder {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #666;
+        }
+
+        /* Área de Conteúdo Principal */
+        main {
+            margin-top: 80px;
+            width: 100%;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        /* Widgets de KPIs Falsos */
+        .kpi-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .widget {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .widget-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #606770;
+            margin-bottom: 15px;
+        }
+
+        .kpi-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #1c1e21;
+        }
+
+        .kpi-sub {
+            color: #8c939d;
+            font-size: 0.9rem;
+        }
+
+        /* Widget do Gráfico de Pizza */
+        .chart-widget {
+            grid-column: 2 / 3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .chart-container {
+            width: 100%;
+            max-width: 350px;
+            height: 350px;
+            margin-top: 20px;
+        }
+
+        /* Dica do Dia no Rodapé */
+        .tip-widget {
+            grid-column: 1 / 3;
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .tip-icon { font-size: 2rem; }
+
+        .tip-text {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
     </style>
 </head>
 <body>
 
-    <h1 id="main-title">Desafio Lógico</h1>
-    <div id="status">Sua vez, novata. Tente não demorar.</div>
-    
-    <div class="board" id="board">
-        <div id="strike-line"></div>
-        <div class="cell" data-index="0"></div>
-        <div class="cell" data-index="1"></div>
-        <div class="cell" data-index="2"></div>
-        <div class="cell" data-index="3"></div>
-        <div class="cell" data-index="4"></div>
-        <div class="cell" data-index="5"></div>
-        <div class="cell" data-index="6"></div>
-        <div class="cell" data-index="7"></div>
-        <div class="cell" data-index="8"></div>
-    </div>
+    <header>
+        <div class="logo">GLOBAL SOLUTIONS BI</div>
+        <div class="user-profile">
+            <span class="name">Érica Martins [Comercial]</span>
+            <div class="avatar-placeholder">EM</div>
+        </div>
+    </header>
 
-    <button onclick="resetGame()">Reiniciar Ambiente (Você vai perder de novo)</button>
+    <main>
+        <div class="kpi-container">
+            <div class="widget">
+                <div class="widget-title">Paciência do Sênior</div>
+                <div class="kpi-value">2%</div>
+                <div class="kpi-sub">(Nível Crítico de Atenção)</div>
+            </div>
+            <div class="widget">
+                <div class="widget-title">E-mails lidos do Sênior</div>
+                <div class="kpi-value">0%</div>
+                <div class="kpi-sub">(Confirmados em logs de servidor)</div>
+            </div>
+            <div class="widget">
+                <div class="widget-title">Logs de Teimosia</div>
+                <div class="kpi-value">14</div>
+                <div class="kpi-sub">(Ocorrências nas últimas 2h)</div>
+            </div>
+            <div class="widget">
+                <div class="widget-title">Perguntas Idiotas [Sênior Ignore Rate]</div>
+                <div class="kpi-value">100%</div>
+                <div class="kpi-sub">(Eficiência máxima de ignorar)</div>
+            </div>
+        </div>
 
-    <div id="defeat-screen">
-        <div class="defeat-text">DERROTA</div>
-        <div class="defeat-sub">A superioridade técnica prevalece.</div>
-    </div>
+        <div class="widget chart-widget">
+            <div class="widget-title">GRÁFICO DE PRODUTIVIDADE DIÁRIA</div>
+            <div class="chart-container">
+                <canvas id="productivityChart"></canvas>
+            </div>
+        </div>
+
+        <div class="widget tip-widget">
+            <span class="tip-icon">⚠️</span>
+            <div class="tip-text">AVISO DE SISTEMA: O servidor detectou que você está dedicando tempo excessivo a me irritar. Tente focar em KPIs de vendas reais ou procure o suporte técnica (EU).</div>
+        </div>
+    </main>
 
     <script>
-        let board = ["", "", "", "", "", "", "", "", ""];
-        let gameActive = true;
-        const statusDisplay = document.getElementById('status');
-        const boardElement = document.getElementById('board');
-        const strikeLine = document.getElementById('strike-line');
-        const defeatScreen = document.getElementById('defeat-screen');
-
-        const winConditions = [
-            [0, 1, 2], [3, 4, 5], [6, 7, 8],
-            [0, 3, 6], [1, 4, 7], [2, 5, 8],
-            [0, 4, 8], [2, 4, 6]            
-        ];
-
-        const lineStyles = [
-            { top: '48px', left: '10px', width: '290px', transform: 'rotate(0deg)' },
-            { top: '153px', left: '10px', width: '290px', transform: 'rotate(0deg)' },
-            { top: '258px', left: '10px', width: '290px', transform: 'rotate(0deg)' },
-            { top: '10px', left: '48px', width: '290px', transform: 'rotate(90deg)' },
-            { top: '10px', left: '153px', width: '290px', transform: 'rotate(90deg)' },
-            { top: '10px', left: '258px', width: '290px', transform: 'rotate(90deg)' },
-            { top: '15px', left: '15px', width: '400px', transform: 'rotate(45deg)' },
-            { top: '15px', left: '295px', width: '400px', transform: 'rotate(135deg)' }
-        ];
-
-        document.querySelectorAll('.cell').forEach(cell => cell.addEventListener('click', handleCellClick));
-
-        function handleCellClick(e) {
-            const index = parseInt(e.target.getAttribute('data-index'));
-            if (board[index] !== "" || !gameActive) return;
-
-            // Jogada dela
-            atualizarCasa(index, "X");
-
-            // Se a jogada dela der vitória, roubamos IMEDIATAMENTE.
-            if (checkWin("X") !== -1) {
-                gameActive = false;
-                aplicarGitRevert(index);
-                return;
-            }
-
-            if (!board.includes("")) {
-                aplicarPensamentoForaDaCaixa();
-                return;
-            }
-
-            statusDisplay.innerText = "Calculando...";
-            gameActive = false;
-            setTimeout(computerPlay, 600);
-        }
-
-        function computerPlay() {
-            let userCells = board.map((v, i) => v === "X" ? i : null).filter(v => v !== null);
-            let emptyCount = board.filter(x => x === "").length;
-            
-            // RNG (Sorteio do Roubo) de 0 a 100
-            let chance = Math.floor(Math.random() * 100);
-
-            // Roubo 1: Apaga um X dela do nada (30% de chance se ela tiver peças)
-            if (chance < 30 && userCells.length > 0) {
-                aplicarGarbageCollector(userCells);
-            } 
-            // Roubo 2: Joga duas vezes (30% de chance se tiver espaço)
-            else if (chance >= 30 && chance < 60 && emptyCount >= 2) {
-                fazerJogadaValida();
-                setTimeout(() => {
-                    fazerJogadaValida(true);
-                    statusDisplay.innerText = "[AVISO] Multithreading ativado. Duas jogadas num ciclo.";
-                    checkGameStatus();
-                }, 400);
-                return;
-            } 
-            // Jogo "Normal"
-            else {
-                fazerJogadaValida();
-                statusDisplay.innerText = "Jogada processada. Não que você vá entender.";
-            }
-
-            checkGameStatus();
-        }
-
-        function fazerJogadaValida(isDouble = false) {
-            let emptyCells = board.map((val, idx) => val === "" ? idx : null).filter(val => val !== null);
-            if (emptyCells.length === 0) return;
-
-            let randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-            atualizarCasa(randomIndex, "O", isDouble);
-        }
-
-        function atualizarCasa(index, player, cheated = false) {
-            board[index] = player;
-            let cell = document.querySelector(`[data-index='${index}']`);
-            cell.innerText = player;
-            cell.className = 'cell ' + player.toLowerCase();
-            if (cheated) cell.classList.add('cheated');
-        }
-
-        // --- ARSENAL DE ROUBOS ---
-
-        // Deleta um X do passado
-        function aplicarGarbageCollector(userCells) {
-            let targetDelete = userCells[Math.floor(Math.random() * userCells.length)];
-            board[targetDelete] = ""; // Limpa lógica
-            let cell = document.querySelector(`[data-index='${targetDelete}']`);
-            cell.innerText = "";
-            cell.className = 'cell cheated'; // Dá um glitch visual
-            
-            statusDisplay.innerText = "[LIMPANDO CACHE] Achei um memory leak e removi seu X antigo.";
-            
-            // Joga logo em seguida
-            setTimeout(() => fazerJogadaValida(), 400);
-        }
-
-        // Rouba a casa da vitória dela
-        function aplicarGitRevert(lastMoveIndex) {
-            statusDisplay.innerText = "Interferência detectada. Revertendo seu commit...";
-            setTimeout(() => {
-                atualizarCasa(lastMoveIndex, "O", true);
-                statusDisplay.innerText = "[ACESSO NEGADO] Dei Git Revert na sua vitória.";
-                checkGameStatus();
-            }, 800);
-        }
-
-        function aplicarPensamentoForaDaCaixa() {
-            statusDisplay.innerText = "Sistema travado? O Sênior cria a própria saída.";
-            const extraCell = document.createElement('div');
-            extraCell.className = 'extra-cell';
-            extraCell.innerText = 'O';
-            boardElement.appendChild(extraCell);
-            
-            setTimeout(() => { triggerHumiliation(null); }, 1000);
-        }
-
-        // --- FIM DOS ROUBOS ---
-
-        function checkWin(player) {
-            for (let i = 0; i < winConditions.length; i++) {
-                if (winConditions[i].every(index => board[index] === player)) {
-                    return i; 
+        // Configuração do Gráfico de Pizza
+        const ctx = document.getElementById('productivityChart').getContext('2d');
+        const productivityChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: [
+                    'Fingindo trabalhar',
+                    'Me ignorando',
+                    'Reclamando do sistema',
+                    'Percebendo que essa página é uma brincadeira'
+                ],
+                datasets: [{
+                    label: 'Alocação de Tempo (%)',
+                    data: [40, 30, 29, 1], // OS DADOS QUE VOCÊ PEDIU
+                    backgroundColor: [
+                        '#1877f2', // Azul - Fingindo
+                        '#f5c518', // Amarelo - Me ignorando
+                        '#d93025', // Vermelho - Reclamando
+                        '#1c1e21'  // Preto - Percebendo
+                    ],
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#1c1e21',
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.parsed + '%';
+                            }
+                        }
+                    }
                 }
             }
-            return -1;
-        }
-
-        function checkGameStatus() {
-            let winIndex = checkWin("O");
-            if (winIndex !== -1) {
-                statusDisplay.innerText = "Fim de jogo.";
-                gameActive = false;
-                triggerHumiliation(winIndex);
-                return;
-            }
-            if (!board.includes("")) {
-                aplicarPensamentoForaDaCaixa();
-                return;
-            }
-            gameActive = true;
-        }
-
-        function triggerHumiliation(winComboIndex) {
-            gameActive = false;
-            if (winComboIndex !== null) {
-                let style = lineStyles[winComboIndex];
-                strikeLine.style.top = style.top; strikeLine.style.left = style.left;
-                strikeLine.style.transform = style.transform; strikeLine.style.setProperty('--final-width', style.width);
-                strikeLine.style.display = 'block'; strikeLine.style.animation = 'drawLine 0.5s ease forwards';
-            }
-
-            setTimeout(() => {
-                defeatScreen.style.display = 'flex';
-                shootConfetti();
-            }, 800);
-        }
-
-        function shootConfetti() {
-            const colors = ['#3fb950', '#ff7b72', '#58a6ff', '#f1e05a', '#a371f7'];
-            for (let i = 0; i < 150; i++) {
-                let conf = document.createElement('div');
-                conf.className = 'confetti';
-                conf.style.left = Math.random() * 100 + 'vw';
-                conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                conf.style.animationDuration = (Math.random() * 2 + 2) + 's';
-                conf.style.animationDelay = (Math.random() * 0.5) + 's';
-                document.body.appendChild(conf);
-                setTimeout(() => conf.remove(), 5000);
-            }
-        }
-
-        function resetGame() {
-            board = ["", "", "", "", "", "", "", "", ""];
-            gameActive = true;
-            statusDisplay.innerText = "Tente de novo. O algoritmo é impiedoso.";
-            
-            document.querySelectorAll('.cell').forEach(cell => {
-                cell.innerText = ""; cell.className = "cell";
-            });
-            
-            let extra = document.querySelector('.extra-cell');
-            if (extra) extra.remove();
-            
-            strikeLine.style.display = 'none';
-            defeatScreen.style.display = 'none';
-            document.querySelectorAll('.confetti').forEach(c => c.remove());
-        }
+        });
     </script>
 </body>
 </html>
