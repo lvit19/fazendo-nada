@@ -16,6 +16,7 @@
             height: 100vh;
             margin: 0;
             overflow: hidden;
+            position: relative;
         }
 
         h1 {
@@ -37,7 +38,7 @@
             grid-template-columns: repeat(3, 100px);
             grid-template-rows: repeat(3, 100px);
             gap: 5px;
-            position: relative; /* Para permitir a casa flutuante */
+            position: relative; 
         }
 
         .cell {
@@ -54,12 +55,9 @@
             user-select: none;
         }
 
-        .cell:hover {
-            background-color: #21262d;
-        }
-
-        .x { color: #8b949e; } /* Cinza sem graça para o usuário */
-        .o { color: #3fb950; } /* Verde brilhante para o Sênior */
+        .cell:hover { background-color: #21262d; }
+        .x { color: #8b949e; }
+        .o { color: #3fb950; }
 
         .cell.cheated {
             animation: glitch 0.3s linear infinite;
@@ -75,46 +73,98 @@
             100% { transform: translate(0) }
         }
 
-        /* A 10ª Casa Surpresa */
         .extra-cell {
+            position: absolute; width: 100px; height: 100px; background-color: #161b22;
+            border: 2px dashed #ff7b72; border-radius: 8px; display: flex; align-items: center;
+            justify-content: center; font-size: 3rem; font-weight: bold; color: #3fb950;
+            top: 210px; left: 320px; box-shadow: 0 0 15px #ff7b72; z-index: 5;
+        }
+
+        /* --- NOVAS ANIMAÇÕES --- */
+        
+        /* O Risco da Vitória */
+        #strike-line {
             position: absolute;
-            width: 100px;
-            height: 100px;
-            background-color: #161b22;
-            border: 2px dashed #ff7b72;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
+            background-color: #3fb950;
+            height: 8px;
+            border-radius: 4px;
+            z-index: 10;
+            transform-origin: left center;
+            display: none;
+            box-shadow: 0 0 10px #3fb950;
+            /* A largura inicial é 0, a animação preenche */
+        }
+
+        @keyframes drawLine {
+            from { width: 0; }
+            to { width: var(--final-width); }
+        }
+
+        /* Tela de Derrota GIGANTE */
+        #defeat-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: rgba(13, 17, 23, 0.85);
+            display: none;
+            flex-direction: column;
             justify-content: center;
-            font-size: 3rem;
-            font-weight: bold;
-            color: #3fb950;
-            top: 210px; 
-            left: 320px; /* Fora do grid */
-            box-shadow: 0 0 15px #ff7b72;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+
+        .defeat-text {
+            font-size: 8rem; /* GIGANTE */
+            color: #ff7b72;
+            font-weight: 900;
+            letter-spacing: 5px;
+            text-shadow: 0 0 20px rgba(255, 123, 114, 0.8);
+            transform: scale(5);
+            opacity: 0;
+            animation: stampIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .defeat-sub {
+            font-size: 2rem;
+            color: #8b949e;
+            margin-top: 20px;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards 1s;
+        }
+
+        @keyframes stampIn {
+            100% { transform: scale(1) rotate(-5deg); opacity: 1; }
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        /* Partículas de Confete */
+        .confetti {
+            position: absolute;
+            width: 15px; height: 15px;
+            z-index: 99;
+            animation: fall linear forwards;
+        }
+        @keyframes fall {
+            to { transform: translateY(110vh) rotate(720deg); }
         }
 
         button {
-            margin-top: 30px;
-            padding: 10px 20px;
-            background-color: #238636;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: bold;
+            margin-top: 30px; padding: 10px 20px; background-color: #238636; color: white;
+            border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: bold;
+            z-index: 101; /* Fica acima da tela de derrota para reiniciar */
         }
-
         button:hover { background-color: #2ea043; }
     </style>
 </head>
 <body>
 
-    <h1>Desafio Lógico</h1>
+    <h1 id="main-title">Desafio Lógico</h1>
     <div id="status">Sua vez, novata. Tente não demorar.</div>
     
     <div class="board" id="board">
+        <div id="strike-line"></div>
         <div class="cell" data-index="0"></div>
         <div class="cell" data-index="1"></div>
         <div class="cell" data-index="2"></div>
@@ -126,27 +176,39 @@
         <div class="cell" data-index="8"></div>
     </div>
 
-    <button onclick="resetGame()">Tentar de novo (spoiler: vai perder igual)</button>
+    <button onclick="resetGame()">Reiniciar Ambiente (Você vai perder de novo)</button>
+
+    <!-- Overlay de Derrota -->
+    <div id="defeat-screen">
+        <div class="defeat-text">DERROTA</div>
+        <div class="defeat-sub">A superioridade técnica prevalece.</div>
+    </div>
 
     <script>
         let board = ["", "", "", "", "", "", "", "", ""];
         let gameActive = true;
         const statusDisplay = document.getElementById('status');
         const boardElement = document.getElementById('board');
+        const strikeLine = document.getElementById('strike-line');
+        const defeatScreen = document.getElementById('defeat-screen');
         let turnosComputador = 0;
-
-        const provocacoes = [
-            "Lento demais. Meu código compila mais rápido que seu raciocínio.",
-            "Essa foi sua melhor jogada? Preocupante.",
-            "Típico erro de lógica de quem é de humanas.",
-            "Você joga tão mal que me deu vontade de refatorar seu cérebro.",
-            "Estou usando apenas 1% da CPU para te vencer."
-        ];
 
         const winConditions = [
             [0, 1, 2], [3, 4, 5], [6, 7, 8], // Linhas
             [0, 3, 6], [1, 4, 7], [2, 5, 8], // Colunas
             [0, 4, 8], [2, 4, 6]             // Diagonais
+        ];
+
+        // Mapeamento das coordenadas do risco para cada condição de vitória
+        const lineStyles = [
+            { top: '48px', left: '10px', width: '290px', transform: 'rotate(0deg)' },     // Linha 1
+            { top: '153px', left: '10px', width: '290px', transform: 'rotate(0deg)' },    // Linha 2
+            { top: '258px', left: '10px', width: '290px', transform: 'rotate(0deg)' },    // Linha 3
+            { top: '10px', left: '48px', width: '290px', transform: 'rotate(90deg)' },    // Coluna 1
+            { top: '10px', left: '153px', width: '290px', transform: 'rotate(90deg)' },   // Coluna 2
+            { top: '10px', left: '258px', width: '290px', transform: 'rotate(90deg)' },   // Coluna 3
+            { top: '15px', left: '15px', width: '400px', transform: 'rotate(45deg)' },    // Diagonal Principal
+            { top: '15px', left: '295px', width: '400px', transform: 'rotate(135deg)' }   // Diagonal Secundária
         ];
 
         document.querySelectorAll('.cell').forEach(cell => cell.addEventListener('click', handleCellClick));
@@ -157,13 +219,11 @@
 
             if (board[index] !== "" || !gameActive) return;
 
-            // Jogada do Usuário
             board[index] = "X";
             cell.innerText = "X";
             cell.classList.add('x');
 
             if (checkWin("X")) {
-                // Se a Erica for ganhar, nós roubamos.
                 aplicarGitRevert(index);
                 return;
             }
@@ -174,27 +234,24 @@
             }
 
             statusDisplay.innerText = "Processando sua jogada ineficiente...";
-            gameActive = false; // Bloqueia clique
-            
-            setTimeout(computerPlay, 800);
+            gameActive = false;
+            setTimeout(computerPlay, 600);
         }
 
         function computerPlay() {
             turnosComputador++;
 
-            // Trapaça 2: Multithreading (Joga duas vezes no turno 3)
             if (turnosComputador === 3 && board.filter(x => x === "").length >= 2) {
                 fazerJogadaValida();
                 setTimeout(() => {
                     fazerJogadaValida(true);
                     statusDisplay.innerText = "Executei duas threads simultâneas. Lide com isso.";
                     checkGameStatus();
-                }, 400);
+                }, 300);
                 return;
             }
 
             fazerJogadaValida();
-            statusDisplay.innerText = provocacoes[Math.floor(Math.random() * provocacoes.length)];
             checkGameStatus();
         }
 
@@ -202,9 +259,7 @@
             let emptyCells = board.map((val, idx) => val === "" ? idx : null).filter(val => val !== null);
             if (emptyCells.length === 0) return;
 
-            // IA burra, pega aleatório, porque a gente ganha roubando
             let randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-            
             board[randomIndex] = "O";
             let cell = document.querySelector(`[data-index='${randomIndex}']`);
             cell.innerText = "O";
@@ -213,45 +268,44 @@
             if(isDouble) cell.classList.add('cheated');
         }
 
-        // Trapaça 1: Apaga o X dela e bota O
         function aplicarGitRevert(lastPlayerMove) {
             setTimeout(() => {
                 board[lastPlayerMove] = "O";
                 let cell = document.querySelector(`[data-index='${lastPlayerMove}']`);
                 cell.innerText = "O";
                 cell.classList.remove('x');
-                cell.classList.add('o');
-                cell.classList.add('cheated');
+                cell.classList.add('o', 'cheated');
                 
                 statusDisplay.innerText = "[ERRO DE PERMISSÃO] Dei um Git Revert na sua jogada. Sênior é Admin.";
                 checkGameStatus();
             }, 500);
         }
 
-        // Trapaça 3: Cria uma casa fora do tabuleiro
         function aplicarPensamentoForaDaCaixa() {
-            statusDisplay.innerText = "Deu velha? Não para mim. Pensamento lateral, aprenda.";
-            
+            statusDisplay.innerText = "Pensamento lateral aplicado. A vitória é inevitável.";
             const extraCell = document.createElement('div');
             extraCell.className = 'extra-cell';
             extraCell.innerText = 'O';
             boardElement.appendChild(extraCell);
             
-            setTimeout(() => {
-                statusDisplay.innerText = "Eu sempre venço. Volta a trabalhar vai.";
-            }, 1500);
+            setTimeout(() => { triggerHumiliation(null); }, 1000);
         }
 
         function checkWin(player) {
-            return winConditions.some(condition => {
-                return condition.every(index => board[index] === player);
-            });
+            for (let i = 0; i < winConditions.length; i++) {
+                if (winConditions[i].every(index => board[index] === player)) {
+                    return i; // Retorna o índice da condição vencedora
+                }
+            }
+            return -1;
         }
 
         function checkGameStatus() {
-            if (checkWin("O")) {
-                statusDisplay.innerText = "VITÓRIA. Como esperado de um desenvolvedor Sênior.";
+            let winIndex = checkWin("O");
+            if (winIndex !== -1) {
+                statusDisplay.innerText = "Sistemas normais. Sênior vence.";
                 gameActive = false;
+                triggerHumiliation(winIndex);
                 return;
             }
             if (!board.includes("")) {
@@ -259,13 +313,52 @@
                 return;
             }
             gameActive = true;
+            statusDisplay.innerText = "Sua vez. Tente não passar vergonha.";
+        }
+
+        // --- MOTOR DE HUMILHAÇÃO (Animações) ---
+        function triggerHumiliation(winComboIndex) {
+            gameActive = false;
+
+            // 1. Desenha a linha riscando a velha (se não foi vitória pela casa extra)
+            if (winComboIndex !== null) {
+                let style = lineStyles[winComboIndex];
+                strikeLine.style.top = style.top;
+                strikeLine.style.left = style.left;
+                strikeLine.style.transform = style.transform;
+                strikeLine.style.setProperty('--final-width', style.width);
+                strikeLine.style.display = 'block';
+                strikeLine.style.animation = 'drawLine 0.5s ease forwards';
+            }
+
+            // 2. Espera a linha terminar, aí joga a tela e confetes
+            setTimeout(() => {
+                defeatScreen.style.display = 'flex';
+                shootConfetti();
+            }, 800);
+        }
+
+        function shootConfetti() {
+            const colors = ['#3fb950', '#ff7b72', '#58a6ff', '#f1e05a', '#a371f7'];
+            for (let i = 0; i < 150; i++) {
+                let conf = document.createElement('div');
+                conf.className = 'confetti';
+                conf.style.left = Math.random() * 100 + 'vw';
+                conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                conf.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                conf.style.animationDelay = (Math.random() * 0.5) + 's';
+                document.body.appendChild(conf);
+                
+                // Limpa o DOM depois que o confete cair
+                setTimeout(() => conf.remove(), 5000);
+            }
         }
 
         function resetGame() {
             board = ["", "", "", "", "", "", "", "", ""];
             gameActive = true;
             turnosComputador = 0;
-            statusDisplay.innerText = "Vamos lá de novo. Tente usar o cérebro desta vez.";
+            statusDisplay.innerText = "Novo jogo. O resultado será o mesmo.";
             
             document.querySelectorAll('.cell').forEach(cell => {
                 cell.innerText = "";
@@ -274,6 +367,10 @@
             
             let extra = document.querySelector('.extra-cell');
             if (extra) extra.remove();
+            
+            strikeLine.style.display = 'none';
+            defeatScreen.style.display = 'none';
+            document.querySelectorAll('.confetti').forEach(c => c.remove());
         }
     </script>
 </body>
